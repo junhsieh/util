@@ -92,16 +92,22 @@ func ValidatePassword(hashed string, plaintextPassword string) error {
 
 // this function can be used for rows.Scan() for setting the value for database fields from SQL query.
 func StrutToSliceOfFieldAddress(theStruct interface{}) []interface{} {
-	fieldArr := reflect.ValueOf(theStruct).Elem()
-
-	fieldAddrArr := make([]interface{}, fieldArr.NumField())
+	fieldArr := reflect.ValueOf(v).Elem()
+	fieldPtrArr := make([]interface{}, 0)
 
 	for i := 0; i < fieldArr.NumField(); i++ {
-		f := fieldArr.Field(i)
-		fieldAddrArr[i] = f.Addr().Interface()
+		typeField := fieldArr.Type().Field(i)
+
+		if typeField.Tag.Get("fieldName") == "-" {
+			continue
+		}
+
+		valueField := fieldArr.Field(i)
+
+		fieldPtrArr = append(fieldPtrArr, valueField.Addr().Interface())
 	}
 
-	return fieldAddrArr
+	return fieldPtrArr
 }
 
 // Fill a slice with values.
