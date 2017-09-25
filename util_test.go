@@ -33,4 +33,7 @@ func TestGenerateRandomString(t *testing.T) {
 
 		fmt.Printf("%s\n", str)
 	}
+
+	fff := util.RandStringBytes(20)
+	fmt.Printf("HERE %s\n", fff)
 }
