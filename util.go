@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"reflect"
@@ -124,11 +123,6 @@ func SliceFill(num int, str string) []string {
 // Generate the placeholders for SQL query.
 func Placeholder(num int) string {
 	return strings.Join(SliceFill(num, "?"), ",")
-}
-
-func RandomNumInSlice(slice []int) int {
-	rand.Seed(time.Now().UTC().UnixNano())
-	return slice[rand.Intn(len(slice))]
 }
 
 func PrintStructJSON(s interface{}) {
