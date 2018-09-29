@@ -9,7 +9,7 @@ import (
 )
 
 import (
-	"github.com/junhsieh/util"
+	"github.com/junxie6/util"
 )
 
 func TestRandomNumber(t *testing.T) {
@@ -36,4 +36,9 @@ func TestGenerateRandomString(t *testing.T) {
 
 	fff := util.RandStringBytes(20)
 	fmt.Printf("HERE %s\n", fff)
+}
+
+func TestGenerateRandomDate(t *testing.T) {
+	d := util.RandomDate(3)
+	fmt.Printf("Date: %s\n", d)
 }

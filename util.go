@@ -2,6 +2,10 @@ package util
 
 import (
 	"bufio"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
