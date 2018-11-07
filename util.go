@@ -372,6 +372,17 @@ func Close(c io.Closer) {
 	}
 }
 
+// DeferClose ...
+// defer DeferClose(&err, rsp.Body.Close)
+// Note: https://github.com/carlmjohnson/json-tidy/blob/master/json-tidy.go#L91:L96
+func DeferClose(err *error, f func() error) {
+	newErr := f()
+
+	if *err == nil {
+		*err = newErr
+	}
+}
+
 // JSONDeepEqual ...
 func JSONDeepEqual(s1 string, s2 string) (bool, error) {
 	var m1, m2 map[string]interface{}
