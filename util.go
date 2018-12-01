@@ -400,6 +400,17 @@ func JSONDeepEqual(s1 string, s2 string) (bool, error) {
 	return reflect.DeepEqual(m1, m2), nil
 }
 
+// Convert uint32 string to uint64 number
+func convUint32StrToUint64(num string) (uint64, error) {
+	return strconv.ParseUint(num, 10, 32)
+}
+
+// Convert uint64 number to string
+func ff(num uint64) string {
+	return strconv.FormatUint(num, 10)
+}
+
+// HelpGenTLSKeys ...
 func HelpGenTLSKeys() {
 	str := `
 To generate the private key and the self-signed certificate:
