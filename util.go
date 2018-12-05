@@ -379,13 +379,13 @@ func Close(c io.Closer) {
 // DeferClose ...
 // defer DeferClose(&err, rsp.Body.Close)
 // Note: https://github.com/carlmjohnson/json-tidy/blob/master/json-tidy.go#L91:L96
-//func DeferClose(err *error, f func() error) {
-func DeferClose(err *error, c io.Closer) {
-	//newErr := f()
-	newErr := c.Close()
+func DeferClose(e *error, c io.Closer) {
+	var err error
 
-	if *err == nil {
-		*err = newErr
+	if err = c.Close(); err != nil {
+		if *e == nil {
+			*e = err
+		}
 	}
 }
 
