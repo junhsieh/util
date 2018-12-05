@@ -173,6 +173,7 @@ func Placeholder(num int) string {
 	return strings.Join(SliceFill(num, "?"), ",")
 }
 
+// PrintStructJSON ...
 func PrintStructJSON(s interface{}) {
 	if strJSON, err := json.MarshalIndent(s, "", " "); err != nil {
 		log.Printf("JSON marshaling failed: %s\n", err)
@@ -181,6 +182,7 @@ func PrintStructJSON(s interface{}) {
 	}
 }
 
+// PrintJSON ...
 func PrintJSON(rowArr []interface{}) {
 	// produces neatly indented output
 	if data, err := json.MarshalIndent(rowArr, "", " "); err != nil {
@@ -190,6 +192,7 @@ func PrintJSON(rowArr []interface{}) {
 	}
 }
 
+// PrintErrJSON ...
 func PrintErrJSON(rowArr []error) {
 	b := make([]interface{}, len(rowArr))
 	for i := range rowArr {
@@ -198,6 +201,7 @@ func PrintErrJSON(rowArr []error) {
 	PrintJSON(b)
 }
 
+// ConvErrArrToJSON ...
 func ConvErrArrToJSON(errArr []error) string {
 	strArr := ConvErrArrToStringArr(errArr)
 
@@ -400,14 +404,21 @@ func JSONDeepEqual(s1 string, s2 string) (bool, error) {
 	return reflect.DeepEqual(m1, m2), nil
 }
 
-// Convert uint32 string to uint64 number
-func convUint32StrToUint64(num string) (uint64, error) {
-	return strconv.ParseUint(num, 10, 32)
+// StrToUint32 converts uint32 string to uint32 integer
+func StrToUint32(num string) uint32 {
+	var n uint64
+	var err error
+
+	if n, err = strconv.ParseUint(num, 10, 32); err != nil {
+		return 0
+	}
+
+	return uint32(n)
 }
 
-// Convert uint64 number to string
-func ff(num uint64) string {
-	return strconv.FormatUint(num, 10)
+// Uint32ToStr converts uint32 integer to string
+func Uint32ToStr(num uint32) string {
+	return strconv.FormatUint(uint64(num), 10)
 }
 
 // HelpGenTLSKeys ...
