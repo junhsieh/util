@@ -42,3 +42,17 @@ func TestGenerateRandomDate(t *testing.T) {
 	d := util.RandomDate(3)
 	fmt.Printf("Date: %s\n", d)
 }
+
+func TestExecCommand(t *testing.T) {
+	var out string
+	var err error
+	var exitStatus int
+	cmdArgs := []string{"sh", "-c", `ls > /asdf.txt`}
+
+	if out, err, exitStatus = util.ExecCommand(cmdArgs, 3); err != nil {
+		fmt.Printf("Error (%d): %s\n", exitStatus, err.Error())
+		return
+	}
+
+	fmt.Printf("Out (%d): %s\n", exitStatus, out)
+}

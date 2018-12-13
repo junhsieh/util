@@ -2,11 +2,13 @@ package util
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"io"
@@ -14,9 +16,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"reflect"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -419,6 +423,77 @@ func StrToUint32(num string) uint32 {
 // Uint32ToStr converts uint32 integer to string
 func Uint32ToStr(num uint32) string {
 	return strconv.FormatUint(uint64(num), 10)
+}
+
+func ExecCommand(cmdArgs []string, timeout int) (string, error, int) {
+	var cmd *exec.Cmd
+	var bufOut bytes.Buffer
+	var bufErr bytes.Buffer
+	var err error
+
+	cmd = exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	cmd.Stdout = &bufOut
+	cmd.Stderr = &bufErr
+
+	if err = cmd.Start(); err != nil {
+		return "", err, -1
+	}
+
+	// Use a channel to signal completion
+	done := make(chan error)
+
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	//
+	select {
+	case <-time.After(time.Duration(timeout) * time.Second):
+		// Timeout, try to kill the process gracefully first
+		// NOTE: You can use signal.Notify to catch the signals and run a cleanup code before shutting down.
+		// Reference:
+		// https://stackoverflow.com/questions/11268943/is-it-possible-to-capture-a-ctrlc-signal-and-run-a-cleanup-function-in-a-defe
+		// https://stackoverflow.com/questions/18106749/golang-catch-signals
+		// https://gobyexample.com/signals
+		if err = cmd.Process.Signal(syscall.SIGTERM); err != nil {
+			return "", err, -1
+		}
+
+		// Kill the process forcefully.
+		select {
+		case <-time.After(3 * time.Second):
+			if err = cmd.Process.Kill(); err != nil {
+				return "", err, -1
+			}
+		case err = <-done:
+			return handleExecCommand(cmd, err)
+		}
+	case err = <-done:
+		return handleExecCommand(cmd, err)
+	}
+
+	return "", errors.New("Unexpected (select did not handle return properly"), -1
+}
+
+func handleExecCommand(cmd *exec.Cmd, err error) (string, error, int) {
+	if err != nil {
+		var ok bool
+		var exitErr *exec.ExitError
+		var exitStatus syscall.WaitStatus
+
+		// Check to see if err is *exec.ExitError or something (most likely system generated error) else
+		if exitErr, ok = err.(*exec.ExitError); !ok {
+			return cmd.Stdout.(*bytes.Buffer).String(), err, -1
+		}
+
+		if exitStatus, ok = exitErr.Sys().(syscall.WaitStatus); !ok {
+			return cmd.Stdout.(*bytes.Buffer).String(), errors.New("exitStatus could not be type assertion to syscall.WaitStatus"), -1
+		}
+
+		return cmd.Stdout.(*bytes.Buffer).String(), errors.New(cmd.Stderr.(*bytes.Buffer).String()), exitStatus.ExitStatus()
+	}
+
+	return cmd.Stdout.(*bytes.Buffer).String(), nil, 0
 }
 
 // HelpGenTLSKeys ...
