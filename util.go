@@ -14,6 +14,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"os/exec"
@@ -520,7 +521,7 @@ func AbsWithTwosComplement(n int64) int64 {
 
 // AbsWithBranch returns the absolute value of x.
 // NOTE: -9223372036854775808 could not be convert.
-func AbsWithBranch(n int64) int64 {
+func AbsWithBranch(n int) int {
 	if n < 0 {
 		return -n
 	}
@@ -573,14 +574,14 @@ func PowOfTenArr() []int {
 // - divide-and-conquer method
 // Reference:
 // https://stackoverflow.com/questions/1306727/way-to-get-number-of-digits-in-an-int/1308407#1308407
-func NumOfDigits(num int) int {
+func NumOfDigitsDivideAndConquer(num int) int {
 	powOfTenArr := PowOfTenArr()
 	powOfTenLen := len(powOfTenArr)
 
-	return numOfDigits(powOfTenArr, 0, powOfTenLen, int(AbsWithBranch(int64(num))))
+	return numOfDigitsDivideAndConquer(powOfTenArr, 0, powOfTenLen, int(AbsWithTwosComplement(int64(num))))
 }
 
-func numOfDigits(powOfTenArr []int, startPos, endPos, num int) int {
+func numOfDigitsDivideAndConquer(powOfTenArr []int, startPos, endPos, num int) int {
 	middlePos := (endPos-startPos)/2 + startPos
 
 	if num < powOfTenArr[middlePos] {
@@ -590,7 +591,7 @@ func numOfDigits(powOfTenArr []int, startPos, endPos, num int) int {
 		}
 
 		//fmt.Printf("SML: %d\t%d\t%d\n", startPos, middlePos, endPos)
-		return numOfDigits(powOfTenArr, startPos, middlePos, num)
+		return numOfDigitsDivideAndConquer(powOfTenArr, startPos, middlePos, num)
 	} else {
 		if (endPos - middlePos) == 1 {
 			//fmt.Printf("END: %d\t%d\t%d\n", startPos, middlePos, endPos)
@@ -598,11 +599,135 @@ func numOfDigits(powOfTenArr []int, startPos, endPos, num int) int {
 		}
 
 		//fmt.Printf("BIG: %d\t%d\t%d\n", startPos, middlePos, endPos)
-		return numOfDigits(powOfTenArr, middlePos, endPos, num)
+		return numOfDigitsDivideAndConquer(powOfTenArr, middlePos, endPos, num)
+	}
+}
+
+// NumOfDigitsDivideAndConquerHardCoded (Divide and conquer hard-coded approach) ...
+func NumOfDigitsDivideAndConquerHardCoded(num int) int {
+	num = int(AbsWithTwosComplement(int64(num)))
+
+	// 9
+	if num < 1000000000 {
+		// 4
+		if num < 10000 {
+			// 2
+			if num < 100 {
+				// 1
+				if num < 10 {
+					return 1
+				} else {
+					return 2
+				}
+			} else {
+				// 3
+				if num < 1000 {
+					return 3
+				} else {
+					return 4
+				}
+			}
+		} else {
+			// 6
+			if num < 1000000 {
+				// 5
+				if num < 100000 {
+					return 5
+				} else {
+					return 6
+				}
+			} else {
+				// 7
+				if num < 10000000 {
+					return 7
+				} else {
+					// 8
+					if num < 100000000 {
+						return 8
+					} else {
+						return 9
+					}
+				}
+			}
+		}
+	} else {
+		// 14
+		if num < 100000000000000 {
+			// 11
+			if num < 100000000000 {
+				// 10
+				if num < 10000000000 {
+					return 10
+				} else {
+					return 11
+				}
+			} else {
+				// 12
+				if num < 1000000000000 {
+					return 12
+				} else {
+					// 13
+					if num < 10000000000000 {
+						return 13
+					} else {
+						return 14
+					}
+				}
+			}
+		} else {
+			// 16
+			if num < 10000000000000000 {
+				// 15
+				if num < 1000000000000000 {
+					return 15
+				} else {
+					return 16
+				}
+			} else {
+				// 17
+				if num < 100000000000000000 {
+					return 17
+				} else {
+					// 18
+					if num < 1000000000000000000 {
+						return 18
+					} else {
+						return 19
+					}
+				}
+			}
+		}
 	}
 }
 
 // NumOfDigitsString (string approach) ...
 func NumOfDigitsString(num int) int {
+	num = int(AbsWithTwosComplement(int64(num)))
 	return len(strconv.Itoa(num))
+}
+
+// NumOfDigitsLog10 (log10 approach) ...
+// NOTE: this function is not 100% correct
+func NumOfDigitsLog10(num int) int {
+	if num == 0 {
+		return 1
+	}
+
+	num = int(AbsWithTwosComplement(int64(num)))
+	return int(math.Log10(float64(num))) + 1
+}
+
+// NumOfDigitsRepeatedDivide (repeated divide approach) ...
+func NumOfDigitsRepeatedDivide(num int) int {
+	if num == 0 {
+		return 1
+	}
+
+	num = int(AbsWithTwosComplement(int64(num)))
+	l := 0
+
+	for ; num > 0; l++ {
+		num /= 10
+	}
+	return l
 }

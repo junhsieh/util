@@ -31,39 +31,63 @@ func TestExecCommand(t *testing.T) {
 func TestNumOfDigits(t *testing.T) {
 	num := 0
 	numAdjusted := 0
-	iLen := 0
-	NumOfDigit := 0
+	numOfDigitsString := 0
+	numOfDigitsDivideAndConquer := 0
+	numOfDigitsRepeatedDivide := 0
+	numOfDigitsDivideAndConquerHardCoded := 0
 
 	powOfTenArr := util.PowOfTenArr()
 
 	for _, num = range powOfTenArr {
 		for i := -10000; i < 100000; i++ {
 			numAdjusted = num + i
-			iLen = len(strconv.Itoa(int(util.AbsWithTwosComplement(int64(numAdjusted)))))
-			NumOfDigit = util.NumOfDigits(numAdjusted)
+			numOfDigitsString = len(strconv.Itoa(int(util.AbsWithTwosComplement(int64(numAdjusted)))))
+			numOfDigitsDivideAndConquer = util.NumOfDigitsDivideAndConquer(numAdjusted)
+			numOfDigitsRepeatedDivide = util.NumOfDigitsRepeatedDivide(numAdjusted)
+			numOfDigitsDivideAndConquerHardCoded = util.NumOfDigitsDivideAndConquerHardCoded(numAdjusted)
 
-			if NumOfDigit != iLen {
-				t.Errorf("%d; got %v; want %v\n", numAdjusted, NumOfDigit, iLen)
+			if numOfDigitsDivideAndConquer != numOfDigitsString {
+				t.Errorf("%d; got %v; want %v\n", numAdjusted, numOfDigitsDivideAndConquer, numOfDigitsString)
+			}
+
+			if numOfDigitsRepeatedDivide != numOfDigitsString {
+				t.Errorf("%d; got %v; want %v\n", numAdjusted, numOfDigitsRepeatedDivide, numOfDigitsString)
+			}
+
+			if numOfDigitsDivideAndConquerHardCoded != numOfDigitsString {
+				t.Errorf("%d; got %v; want %v\n", numAdjusted, numOfDigitsDivideAndConquerHardCoded, numOfDigitsString)
 			}
 		}
 	}
 
 	//
 	//for num = 0; num < math.MaxInt64; num++ {
-	//	iLen = len(strconv.Itoa(num))
-	//	NumOfDigit = util.NumOfDigits(num)
+	//	numOfDigitsString = util.NumOfDigitsString(num)
+	//	numOfDigitsDivideAndConquer = util.NumOfDigitsDivideAndConquer(num)
 
-	//	if NumOfDigit != iLen {
-	//		t.Errorf("got %v; want %v\n", NumOfDigit, iLen)
+	//	if numOfDigitsDivideAndConquer != numOfDigitsString {
+	//		t.Errorf("got %v; want %v\n", numOfDigits, numOfDigitsString)
 	//	}
 	//}
 
 	//
-	iLen = len(strconv.Itoa(math.MaxInt64))
-	NumOfDigit = util.NumOfDigits(math.MaxInt64)
+	numAdjusted = math.MaxInt64
 
-	if NumOfDigit != iLen {
-		t.Errorf("got %v; want %v\n", NumOfDigit, iLen)
+	numOfDigitsString = util.NumOfDigitsString(numAdjusted)
+	numOfDigitsDivideAndConquer = util.NumOfDigitsDivideAndConquer(numAdjusted)
+	numOfDigitsRepeatedDivide = util.NumOfDigitsRepeatedDivide(numAdjusted)
+	numOfDigitsDivideAndConquerHardCoded = util.NumOfDigitsDivideAndConquerHardCoded(numAdjusted)
+
+	if numOfDigitsDivideAndConquer != numOfDigitsString {
+		t.Errorf("%d; got %v; want %v\n", numAdjusted, numOfDigitsDivideAndConquer, numOfDigitsString)
+	}
+
+	if numOfDigitsRepeatedDivide != numOfDigitsString {
+		t.Errorf("%d; got %v; want %v\n", numAdjusted, numOfDigitsRepeatedDivide, numOfDigitsString)
+	}
+
+	if numOfDigitsDivideAndConquerHardCoded != numOfDigitsString {
+		t.Errorf("%d; got %v; want %v\n", numAdjusted, numOfDigitsDivideAndConquerHardCoded, numOfDigitsString)
 	}
 }
 
@@ -79,14 +103,26 @@ func BenchmarkAbsWithBranch(b *testing.B) {
 	}
 }
 
-func BenchmarkNumOfDigits(b *testing.B) {
+func BenchmarkNumOfDigitsDivideAndConquer(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		util.NumOfDigits(math.MaxInt64)
+		util.NumOfDigitsDivideAndConquer(math.MaxInt64)
 	}
 }
 
 func BenchmarkNumOfDigitsString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		util.NumOfDigitsString(math.MaxInt64)
+	}
+}
+
+func BenchmarkNumOfDigitsRepeatedDivide(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		util.NumOfDigitsRepeatedDivide(math.MaxInt64)
+	}
+}
+
+func BenchmarkNumOfDigitsDivideAndConquerHardCoded(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		util.NumOfDigitsDivideAndConquerHardCoded(math.MaxInt64)
 	}
 }
