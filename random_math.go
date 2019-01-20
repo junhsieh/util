@@ -51,6 +51,7 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
+// RandomDate ...
 func RandomDate(numOfYear int) string {
 	numOfHour := RandomNumber(0, numOfYear*365*24) * -1
 	return time.Now().Add(time.Duration(numOfHour) * time.Hour).Format("2006-01-02 15:04:05")
