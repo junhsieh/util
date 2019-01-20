@@ -91,6 +91,11 @@ func TestNumOfDigits(t *testing.T) {
 	}
 }
 
+func TestNotYet(t *testing.T) {
+	digitArr := util.IntToDigitArr(123456)
+	fmt.Printf("HERE: %v_%d_%d\n", digitArr, len(digitArr), cap(digitArr))
+}
+
 func BenchmarkAbsWithTwosComplement(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		util.AbsWithTwosComplement(math.MaxInt64)

@@ -12,3 +12,7 @@ go-test:
 
 go-bench:
 	cd $(ROOT_DIR) && go test -v -mod vendor -run=^$$ -bench "NumOfDigits|AbsWith"
+
+go-testNotYet:
+	@cd $(ROOT_DIR) && go mod vendor -v
+	@cd $(ROOT_DIR) && go test -v -count 1 -mod vendor -race -run "NotYet"
