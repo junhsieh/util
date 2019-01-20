@@ -496,26 +496,113 @@ func handleExecCommand(cmd *exec.Cmd, err error) (string, error, int) {
 	return cmd.Stdout.(*bytes.Buffer).String(), nil, 0
 }
 
-// HelpGenTLSKeys ...
-func HelpGenTLSKeys() {
-	str := `
-To generate the private key and the self-signed certificate:
+// IntEqual ...
+func IntEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
 
-Use this method if you want to use HTTPS (HTTP over TLS) to secure your Apache HTTP or Nginx web server, and you want to use a Certificate Authority (CA) to issue the SSL certificate. The CSR that is generated can be sent to a CA to request the issuance of a CA-signed SSL certificate. If your CA supports SHA-2, add the -sha256 option to sign the CSR with SHA-2.
+// AbsWithTwosComplement returns the absolute value of x.
+// NOTE: -9223372036854775808 could not be convert.
+// Reference:
+// http://cavaliercoder.com/blog/optimized-abs-for-int64-in-go.html
+func AbsWithTwosComplement(n int64) int64 {
+	y := n >> 63
+	return (n ^ y) - y
+}
 
-# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=erp.local" -keyout erp.local.key -out erp.local.csr
+// AbsWithBranch returns the absolute value of x.
+// NOTE: -9223372036854775808 could not be convert.
+func AbsWithBranch(n int64) int64 {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
 
-Note: The -newkey rsa:2048 option specifies that the key should be 2048-bit, generated using the RSA algorithm.
-Note: The -nodes option specifies that the private key should not be encrypted with a pass phrase.
-Note: The -new option, which is not included here but implied, indicates that a CSR is being generated.
+// Pow computes a**b using binary powering algorithm
+// See Donald Knuth, The Art of Computer Programming, Volume 2, Section 4.6.3
+func Pow(a int, b int) int {
+	result := 1
+	for b > 0 {
+		if b&1 != 0 {
+			result *= a
+		}
+		b >>= 1
+		a *= a
+	}
+	return result
+}
 
-Generate a Self-Signed Certificate:
+func PowOfTenArr() []int {
+	return []int{
+		1,                   // 0
+		10,                  // 1
+		100,                 // 2
+		1000,                // 3
+		10000,               // 4
+		100000,              // 5
+		1000000,             // 6
+		10000000,            // 7
+		100000000,           // 8
+		1000000000,          // 9
+		10000000000,         // 10
+		100000000000,        // 11
+		1000000000000,       // 12
+		10000000000000,      // 13
+		100000000000000,     // 14
+		1000000000000000,    // 15
+		10000000000000000,   // 16
+		100000000000000000,  // 17
+		1000000000000000000, // 18
+	}
+}
 
-Use this method if you want to use HTTPS (HTTP over TLS) to secure your Apache HTTP or Nginx web server, and you do not require that your certificate is signed by a CA.
+// NumOfDigits (Divide and conquer approach) ...
+// Here are some ways of determining the number of digits in an integer:
+// - string method
+// - log10 method
+// - repeated divide method
+// - divide-and-conquer method
+// Reference:
+// https://stackoverflow.com/questions/1306727/way-to-get-number-of-digits-in-an-int/1308407#1308407
+func NumOfDigits(num int) int {
+	powOfTenArr := PowOfTenArr()
+	powOfTenLen := len(powOfTenArr)
 
-This command creates a 2048-bit private key (domain.key) and a self-signed certificate (domain.crt) from scratch:
+	return numOfDigits(powOfTenArr, 0, powOfTenLen, int(AbsWithBranch(int64(num))))
+}
 
-# openssl req -newkey rsa:2048 -nodes -subj "/C=CA/ST=British Columbia/L=Vancouver/O=My Company Name/CN=erp.local" -keyout erp.local.key -x509 -days 365 -out erp.local.crt
-`
-	log.Printf("%v\n", str)
+func numOfDigits(powOfTenArr []int, startPos, endPos, num int) int {
+	middlePos := (endPos-startPos)/2 + startPos
+
+	if num < powOfTenArr[middlePos] {
+		if (middlePos - startPos) == 1 {
+			//fmt.Printf("END: %d\t%d\t%d\n", startPos, middlePos, endPos)
+			return middlePos
+		}
+
+		//fmt.Printf("SML: %d\t%d\t%d\n", startPos, middlePos, endPos)
+		return numOfDigits(powOfTenArr, startPos, middlePos, num)
+	} else {
+		if (endPos - middlePos) == 1 {
+			//fmt.Printf("END: %d\t%d\t%d\n", startPos, middlePos, endPos)
+			return middlePos + 1
+		}
+
+		//fmt.Printf("BIG: %d\t%d\t%d\n", startPos, middlePos, endPos)
+		return numOfDigits(powOfTenArr, middlePos, endPos, num)
+	}
+}
+
+// NumOfDigitsString (string approach) ...
+func NumOfDigitsString(num int) int {
+	return len(strconv.Itoa(num))
 }
