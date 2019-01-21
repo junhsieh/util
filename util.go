@@ -735,6 +735,7 @@ func NumOfDigitsRepeatedDivide(num int) int {
 // IntToDigitArr separates the digits of an integer into a slice
 // Reference:
 // https://stackoverflow.com/questions/1613317/fastest-way-to-separate-the-digits-of-an-int-into-an-array-in-net
+// https://stackoverflow.com/questions/4261589/how-do-i-split-an-int-into-its-digits
 func IntToDigitArr(num int) []int {
 	size := NumOfDigitsDivideAndConquerHardCoded(num)
 	digitArr := make([]int, size)
