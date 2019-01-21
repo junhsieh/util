@@ -5,8 +5,10 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -746,4 +748,11 @@ func IntToDigitArr(num int) []int {
 	}
 
 	return digitArr
+}
+
+// HMACHash hashes data using a secret key
+func HMACHash(message string, secret string) string {
+	hash := hmac.New(sha256.New, []byte(secret))
+	hash.Write([]byte(message))
+	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
