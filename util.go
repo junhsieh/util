@@ -227,6 +227,7 @@ func ConvErrArrToJSON(errArr []error) string {
 	return string(byteJSON)
 }
 
+// ConvSliceToInterface ...
 func ConvSliceToInterface(slice interface{}) []interface{} {
 	s := reflect.ValueOf(slice)
 
@@ -244,6 +245,7 @@ func ConvSliceToInterface(slice interface{}) []interface{} {
 	return ret
 }
 
+// ConvErrArrToStringArr ...
 func ConvErrArrToStringArr(errArr []error) []string {
 	strArr := make([]string, len(errArr))
 	for i := range errArr {
@@ -252,6 +254,7 @@ func ConvErrArrToStringArr(errArr []error) []string {
 	return strArr
 }
 
+// DecodeJSONStreamStruct ...
 func DecodeJSONStreamStruct(r *http.Request, v interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
 		return err
@@ -260,6 +263,7 @@ func DecodeJSONStreamStruct(r *http.Request, v interface{}) error {
 	return nil
 }
 
+// DecodeJSONStreamMap ...
 func DecodeJSONStreamMap(r *http.Request) (map[string]interface{}, error) {
 	var data interface{}
 
@@ -270,6 +274,7 @@ func DecodeJSONStreamMap(r *http.Request) (map[string]interface{}, error) {
 	return data.(map[string]interface{}), nil
 }
 
+// FormValueArr ...
 func FormValueArr(r *http.Request) map[string]string {
 	mapArr := map[string]string{}
 
@@ -288,16 +293,19 @@ func FormValueArr(r *http.Request) map[string]string {
 	return mapArr
 }
 
+// Atoi ...
 func Atoi(num string) int {
 	i, _ := strconv.ParseInt(num, 10, 0)
 	return int(i)
 }
 
+// Atoi64 ...
 func Atoi64(num string) int64 {
 	i, _ := strconv.ParseInt(num, 10, 64)
 	return i
 }
 
+// StructFieldNameArr ...
 func StructFieldNameArr(s interface{}) []string {
 	sFields := reflect.TypeOf(s)
 	fieldNameArr := make([]string, sFields.NumField())
@@ -309,6 +317,7 @@ func StructFieldNameArr(s interface{}) []string {
 	return fieldNameArr
 }
 
+// InArrayV1 ...
 func InArrayV1(val interface{}, array interface{}) (exists bool, index int) {
 	exists = false
 	index = -1
@@ -329,6 +338,7 @@ func InArrayV1(val interface{}, array interface{}) (exists bool, index int) {
 	return
 }
 
+// InArrayV2 ...
 func InArrayV2(v interface{}, in interface{}) (ok bool, i int) {
 	val := reflect.Indirect(reflect.ValueOf(in))
 	switch val.Kind() {
@@ -342,6 +352,7 @@ func InArrayV2(v interface{}, in interface{}) (ok bool, i int) {
 	return
 }
 
+// InArrayInt ...
 func InArrayInt(v int, vArr []int) bool {
 	for _, vv := range vArr {
 		if v == vv {
@@ -352,6 +363,7 @@ func InArrayInt(v int, vArr []int) bool {
 	return false
 }
 
+// InArrayStr ...
 func InArrayStr(v string, vArr []string) bool {
 	for _, vv := range vArr {
 		if v == vv {
@@ -362,6 +374,7 @@ func InArrayStr(v string, vArr []string) bool {
 	return false
 }
 
+// FGColor ...
 var FGColor = struct {
 	White, Red, Green, Yellow string
 }{
@@ -371,6 +384,7 @@ var FGColor = struct {
 	Yellow: "1;33",
 }
 
+// EchoColor ...
 func EchoColor(msg string, color string) string {
 	return "\033[" + color + "m" + msg + "\033[0m"
 }
@@ -428,6 +442,7 @@ func Uint32ToStr(num uint32) string {
 	return strconv.FormatUint(uint64(num), 10)
 }
 
+// ExecCommand ...
 func ExecCommand(cmdArgs []string, timeout int) (string, error, int) {
 	var cmd *exec.Cmd
 	var bufOut bytes.Buffer
@@ -544,6 +559,7 @@ func Pow(a int, b int) int {
 	return result
 }
 
+// PowOfTenArr ...
 func PowOfTenArr() []int {
 	return []int{
 		1,                   // 0
@@ -755,4 +771,14 @@ func HMACHash(message string, secret string) string {
 	hash := hmac.New(sha256.New, []byte(secret))
 	hash.Write([]byte(message))
 	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
+}
+
+// CopyIntSlice ...
+func CopyIntSlice(dst []int, src []int) int {
+	if src == nil {
+		dst = nil
+		return 0
+	}
+	dst = make([]int, len(src))
+	return copy(dst, src)
 }
