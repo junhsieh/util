@@ -42,6 +42,10 @@ func ReadFile(fileName string) ([]byte, error) {
 func ReadWebContent(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +53,6 @@ func ReadWebContent(url string) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("StatusCode: %s", resp.Status)
 	}
-
-	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 
