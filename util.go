@@ -3,12 +3,6 @@ package util
 import (
 	"bufio"
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/hmac"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,8 +18,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func ReadInput() (string, error) {
@@ -93,58 +85,6 @@ func WaitForServer(url string) error {
 		time.Sleep(time.Second << uint(tries)) // exponential backoff
 	}
 	return fmt.Errorf("server %s failed to respond after %s", url, timeout)
-}
-
-// HashPassword ...
-func HashPassword(plaintextPassword string) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(plaintextPassword), bcrypt.DefaultCost)
-}
-
-// ValidatePassword ...
-func ValidatePassword(hashed string, plaintextPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plaintextPassword))
-}
-
-// CreateHash ...
-func CreateHash(key string) []byte {
-	hash := sha256.Sum256([]byte(key))
-	return hash[:]
-}
-
-// EncryptAES ...
-// Reference: https://www.thepolyglotdeveloper.com/2018/02/encrypt-decrypt-data-golang-application-crypto-packages/
-func EncryptAES(data []byte, passphrase string) []byte {
-	block, _ := aes.NewCipher([]byte(CreateHash(passphrase)))
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		panic(err.Error())
-	}
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
-	}
-	ciphertext := gcm.Seal(nonce, nonce, data, nil)
-	return ciphertext
-}
-
-// DecryptAES ...
-func DecryptAES(data []byte, passphrase string) []byte {
-	key := []byte(CreateHash(passphrase))
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		panic(err.Error())
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		panic(err.Error())
-	}
-	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
-	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		panic(err.Error())
-	}
-	return plaintext
 }
 
 // StrutToSliceOfFieldAddress can be used for rows.Scan() for setting the value for database fields from SQL query.
@@ -767,13 +707,6 @@ func IntToDigitArr(num int) []int {
 	}
 
 	return digitArr
-}
-
-// HMACHash hashes data using a secret key
-func HMACHash(message string, secret string) string {
-	hash := hmac.New(sha256.New, []byte(secret))
-	hash.Write([]byte(message))
-	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
 
 // CopyIntSlice ...
