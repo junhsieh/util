@@ -1,5 +1,5 @@
 //
-// go test -v -run="RandomNumber|GenerateRandomString" util_test.go
+// go test -v -count 1 -timeout 1h -mod vendor -race -run="RandomNumber|GenerateRandomString" util_test.go
 //
 package util_test
 
