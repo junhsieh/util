@@ -20,7 +20,7 @@ go-testNotYet:
 	@cd $(CURDIR) && go test -v -count 1 -mod vendor -race -run "NotYet"
 
 go-tidy:
-	cd $(ROOT_DIR) && go mod tidy -v
+	@cd $(CURDIR) && go mod tidy -v
 
 go-clean:
-	cd $(ROOT_DIR) && go clean -i -x -modcache
+	@cd $(CURDIR) && go clean -i -x -modcache
