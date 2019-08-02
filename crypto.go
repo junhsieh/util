@@ -26,6 +26,7 @@ func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	var err error
 	var privKey *rsa.PrivateKey
 
+	// TODO: find out whether it's a good idea to use rand.Reader (global variables)
 	if privKey, err = rsa.GenerateKey(rand.Reader, bits); err != nil {
 		return nil, nil, err
 	}
@@ -92,7 +93,7 @@ func BytesToPrivateKey(data []byte) (privKey *rsa.PrivateKey, err error) {
 		}
 
 		if privKey, ok = ifc.(*rsa.PrivateKey); !ok {
-			return privKey, fmt.Errorf("Failed to type assert to *rsa.PrivateKey")
+			return privKey, fmt.Errorf("Failed to type assertion to *rsa.PrivateKey")
 		}
 	default:
 		return privKey, fmt.Errorf("unsupported %s block.Type", block.Type)
@@ -130,27 +131,13 @@ func BytesToPublicKey(data []byte) (pubKey *rsa.PublicKey, err error) {
 // EncryptWithPublicKey encrypts data with public key
 func EncryptWithPublicKey(msg []byte, pub *rsa.PublicKey) ([]byte, error) {
 	hash := sha512.New()
-	var ciphertext []byte
-	var err error
-
-	if ciphertext, err = rsa.EncryptOAEP(hash, rand.Reader, pub, msg, nil); err != nil {
-		return nil, err
-	}
-
-	return ciphertext, nil
+	return rsa.EncryptOAEP(hash, rand.Reader, pub, msg, nil)
 }
 
 // DecryptWithPrivateKey decrypts data with private key
 func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, error) {
 	hash := sha512.New()
-	var plaintext []byte
-	var err error
-
-	if plaintext, err = rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil); err != nil {
-		return nil, err
-	}
-
-	return plaintext, nil
+	return rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
 }
 
 // HashPassword ...
@@ -183,36 +170,66 @@ func HMACHash(message string, secret string) string {
 }
 
 // EncryptAES ...
-func EncryptAES(data []byte, passphrase string) []byte {
-	block, _ := aes.NewCipher([]byte(CreateHash(passphrase)))
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		panic(err.Error())
+func EncryptAES(data []byte, passphrase string) ([]byte, error) {
+	// Generate a new aes cipher using our 32 byte long key
+	var err error
+	var block cipher.Block
+
+	if block, err = aes.NewCipher([]byte(CreateHash(passphrase))); err != nil {
+		return nil, err
 	}
+
+	//
+	var gcm cipher.AEAD
+
+	if gcm, err = cipher.NewGCM(block); err != nil {
+		return nil, err
+	}
+
+	//
 	nonce := make([]byte, gcm.NonceSize())
+
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
+		return nil, err
 	}
+
 	ciphertext := gcm.Seal(nonce, nonce, data, nil)
-	return ciphertext
+	return ciphertext, nil
 }
 
 // DecryptAES ...
-func DecryptAES(data []byte, passphrase string) []byte {
+func DecryptAES(data []byte, passphrase string) ([]byte, error) {
+	var err error
+	var block cipher.Block
+
 	key := []byte(CreateHash(passphrase))
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		panic(err.Error())
+
+	if block, err = aes.NewCipher(key); err != nil {
+		return nil, err
 	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		panic(err.Error())
+
+	//
+	var gcm cipher.AEAD
+
+	if gcm, err = cipher.NewGCM(block); err != nil {
+		return nil, err
 	}
+
+	//
 	nonceSize := gcm.NonceSize()
-	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
-	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		panic(err.Error())
+
+	if len(data) < nonceSize {
+		return nil, fmt.Errorf("data size is less than nonceSize")
 	}
-	return plaintext
+
+	//
+	var plaintext []byte
+
+	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
+
+	if plaintext, err = gcm.Open(nil, nonce, ciphertext, nil); err != nil {
+		return nil, err
+	}
+
+	return plaintext, nil
 }
