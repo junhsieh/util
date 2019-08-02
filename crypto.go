@@ -176,7 +176,7 @@ func EncryptAES(data []byte, passphrase string) ([]byte, error) {
 	var err error
 	var block cipher.Block
 
-	if block, err = aes.NewCipher([]byte(CreateHash(passphrase))); err != nil {
+	if block, err = aes.NewCipher(CreateHash(passphrase)); err != nil {
 		return nil, err
 	}
 
@@ -214,7 +214,7 @@ func DecryptAES(data []byte, passphrase string) ([]byte, error) {
 	var err error
 	var block cipher.Block
 
-	key := []byte(CreateHash(passphrase))
+	key := CreateHash(passphrase)
 
 	if block, err = aes.NewCipher(key); err != nil {
 		return nil, err
@@ -230,6 +230,7 @@ func DecryptAES(data []byte, passphrase string) ([]byte, error) {
 	//
 	nonceSize := gcm.NonceSize()
 
+	// TODO: do we really need this checking?
 	if len(data) < nonceSize {
 		return nil, fmt.Errorf("data size is less than nonceSize")
 	}

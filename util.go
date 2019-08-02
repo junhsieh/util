@@ -457,8 +457,25 @@ func handleExecCommand(cmd *exec.Cmd, err error) (string, error, int) {
 	return cmd.Stdout.(*bytes.Buffer).String(), nil, 0
 }
 
-// IntEqual ...
-func IntEqual(a, b []int) bool {
+// IntSliceEqual tells whether a and b contain the same elements.
+// A nil argument is equivalent to an empty slice.
+// NOTE: https://yourbasic.org/golang/compare-slices/
+func IntSliceEqual(a []int, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// ByteSliceEqual tells whether a and b contain the same elements.
+// A nil argument is equivalent to an empty slice.
+// NOTE: https://yourbasic.org/golang/compare-slices/
+func ByteSliceEqual(a []byte, b []byte) bool {
 	if len(a) != len(b) {
 		return false
 	}
