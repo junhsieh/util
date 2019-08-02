@@ -2,6 +2,7 @@
 // https://gist.github.com/miguelmota/3ea9286bd1d3c2a985b67cac4ba2130a
 // https://stackoverflow.com/questions/48958304/pkcs1-and-pkcs8-format-for-rsa-private-key
 // https://www.thepolyglotdeveloper.com/2018/02/encrypt-decrypt-data-golang-application-crypto-packages/
+// https://tutorialedge.net/golang/go-encrypt-decrypt-aes-tutorial/
 package util
 
 import (
@@ -179,21 +180,32 @@ func EncryptAES(data []byte, passphrase string) ([]byte, error) {
 		return nil, err
 	}
 
-	//
+	// gcm or Galois/Counter Mode, is a mode of operation
+	// for symmetric key cryptographic block ciphers
+	// - https://en.wikipedia.org/wiki/Galois/Counter_Mode
 	var gcm cipher.AEAD
 
 	if gcm, err = cipher.NewGCM(block); err != nil {
 		return nil, err
 	}
 
-	//
+	// creates a new byte array the size of the nonce
+	// which must be passed to Seal
 	nonce := make([]byte, gcm.NonceSize())
 
+	// populates our nonce with a cryptographically secure
+	// random sequence
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
 
+	// here we encrypt our text using the Seal function
+	// Seal encrypts and authenticates plaintext, authenticates the
+	// additional data and appends the result to dst, returning the updated
+	// slice. The nonce must be NonceSize() bytes long and unique for all
+	// time, for a given key.
 	ciphertext := gcm.Seal(nonce, nonce, data, nil)
+
 	return ciphertext, nil
 }
 
