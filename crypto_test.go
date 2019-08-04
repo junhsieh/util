@@ -4,10 +4,10 @@
 package util_test
 
 import (
+	"crypto/rsa"
+	"io/ioutil"
 	"testing"
-)
 
-import (
 	"github.com/junxie6/util"
 )
 
@@ -35,6 +35,57 @@ func TestEncryptAES(t *testing.T) {
 
 	if util.ByteSliceEqual(msg, decrypted) != true {
 		t.Errorf("Error: %s", "Decrypted value not match")
+		return
+	}
+}
+
+func TestSignSignature(t *testing.T) {
+	var err error
+	data := []byte("This is a testing msg")
+
+	//
+	var privateKeyBytes []byte
+
+	if privateKeyBytes, err = ioutil.ReadFile("demo.local.key"); err != nil {
+		t.Errorf("Error: %s", err.Error())
+		return
+	}
+
+	//
+	var privateKey *rsa.PrivateKey
+
+	if privateKey, err = util.BytesToPrivateKey(privateKeyBytes); err != nil {
+		t.Errorf("Error: %s", err.Error())
+		return
+	}
+
+	//
+	var publicKeyBytes []byte
+
+	if publicKeyBytes, err = ioutil.ReadFile("demo.local.pub"); err != nil {
+		t.Errorf("Error: %s", err.Error())
+		return
+	}
+
+	//
+	var publicKey *rsa.PublicKey
+
+	if publicKey, err = util.BytesToPublicKey(publicKeyBytes); err != nil {
+		t.Errorf("Error: %s", err.Error())
+		return
+	}
+
+	//
+	var signatureBytes []byte
+
+	if signatureBytes, err = util.SignSignature(privateKey, data); err != nil {
+		t.Errorf("Error: %s", err.Error())
+		return
+	}
+
+	//
+	if err = util.VerifySignature(publicKey, data, signatureBytes); err != nil {
+		t.Errorf("Error: %s", err.Error())
 		return
 	}
 }

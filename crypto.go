@@ -6,6 +6,7 @@
 package util
 
 import (
+	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
@@ -152,15 +153,15 @@ func ValidatePassword(hashed string, plaintextPassword string) error {
 }
 
 // CreateHash ...
-func CreateHash(key string) []byte {
-	hash := sha256.Sum256([]byte(key))
+func CreateHash(data string) []byte {
+	digest := sha256.Sum256([]byte(data))
 
 	// Alternative way
 	//hash := sha256.New()
-	//hash.Write([]byte(key))
+	//hash.Write([]byte(data))
 	//digest := hash.Sum(nil)
 
-	return hash[:]
+	return digest[:]
 }
 
 // HMACHash hashes data using a secret key
@@ -245,4 +246,16 @@ func DecryptAES(data []byte, passphrase string) ([]byte, error) {
 	}
 
 	return plaintext, nil
+}
+
+// SignSignature signs the data with a private key
+func SignSignature(privateKey *rsa.PrivateKey, data []byte) ([]byte, error) {
+	digest := sha256.Sum256(data)
+	return rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, digest[:])
+}
+
+// VerifySignature verifies the data with a public key
+func VerifySignature(publicKey *rsa.PublicKey, data []byte, sig []byte) error {
+	digest := sha256.Sum256(data)
+	return rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, digest[:], sig)
 }

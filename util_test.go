@@ -8,9 +8,7 @@ import (
 	"math"
 	"strconv"
 	"testing"
-)
 
-import (
 	"github.com/junxie6/util"
 )
 
