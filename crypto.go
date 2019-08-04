@@ -38,14 +38,12 @@ func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 
 // PrivateKeyToBytes private key to bytes
 func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
-	privBytes := pem.EncodeToMemory(
+	return pem.EncodeToMemory(
 		&pem.Block{
 			Type:  "RSA PRIVATE KEY",
 			Bytes: x509.MarshalPKCS1PrivateKey(priv),
 		},
 	)
-
-	return privBytes
 }
 
 // PublicKeyToBytes public key to bytes
@@ -69,21 +67,25 @@ func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
 }
 
 // BytesToPrivateKey bytes to private key
-func BytesToPrivateKey(data []byte) (privKey *rsa.PrivateKey, err error) {
+func BytesToPrivateKey(data []byte) (*rsa.PrivateKey, error) {
+	var err error
 	block, _ := pem.Decode(data)
 	b := block.Bytes
 
 	if x509.IsEncryptedPEMBlock(block) == true {
 		if b, err = x509.DecryptPEMBlock(block, nil); err != nil {
-			return privKey, err
+			return nil, err
 		}
 	}
+
+	//
+	var privKey *rsa.PrivateKey
 
 	switch block.Type {
 	case "RSA PRIVATE KEY":
 		// pkcs1
 		if privKey, err = x509.ParsePKCS1PrivateKey(b); err != nil {
-			return privKey, err
+			return nil, err
 		}
 	case "PRIVATE KEY":
 		// pkcs8
@@ -91,40 +93,44 @@ func BytesToPrivateKey(data []byte) (privKey *rsa.PrivateKey, err error) {
 		var ok bool
 
 		if ifc, err = x509.ParsePKCS8PrivateKey(b); err != nil {
-			return privKey, err
+			return nil, err
 		}
 
 		if privKey, ok = ifc.(*rsa.PrivateKey); !ok {
-			return privKey, fmt.Errorf("Failed to type assertion to *rsa.PrivateKey")
+			return nil, fmt.Errorf("Failed to type assertion to *rsa.PrivateKey")
 		}
 	default:
-		return privKey, fmt.Errorf("unsupported %s block.Type", block.Type)
+		return nil, fmt.Errorf("unsupported %s block.Type", block.Type)
 	}
 
-	return privKey, err
+	return privKey, nil
 }
 
 // BytesToPublicKey bytes to public key
-func BytesToPublicKey(data []byte) (pubKey *rsa.PublicKey, err error) {
+func BytesToPublicKey(data []byte) (*rsa.PublicKey, error) {
+	var err error
 	block, _ := pem.Decode(data)
 	b := block.Bytes
 
 	if x509.IsEncryptedPEMBlock(block) == true {
 		if b, err = x509.DecryptPEMBlock(block, nil); err != nil {
-			return pubKey, err
+			return nil, err
 		}
 	}
 
 	//
 	var ifc interface{}
-	var ok bool
 
 	if ifc, err = x509.ParsePKIXPublicKey(b); err != nil {
-		return pubKey, err
+		return nil, err
 	}
 
+	//
+	var pubKey *rsa.PublicKey
+	var ok bool
+
 	if pubKey, ok = ifc.(*rsa.PublicKey); !ok {
-		return pubKey, fmt.Errorf("Failed to type assert to *rsa.PublicKey")
+		return nil, fmt.Errorf("Failed to type assert to *rsa.PublicKey")
 	}
 
 	return pubKey, nil
