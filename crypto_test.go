@@ -5,6 +5,7 @@ package util_test
 
 import (
 	"crypto/rsa"
+	//"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -88,4 +89,14 @@ func TestSignSignature(t *testing.T) {
 		t.Errorf("Error: %s", err.Error())
 		return
 	}
+}
+
+func TestCreateHash(t *testing.T) {
+	//hash := util.CreateHash("asdf")
+	//fmt.Printf("HERE: %d %v\n", len(hash), hash)
+}
+
+func TestHMACHash(t *testing.T) {
+	//hash := util.HMACHash("asdf", "xxx")
+	//fmt.Printf("HERE: %d %s\n", len(hash), hash)
 }
