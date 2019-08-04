@@ -1,3 +1,26 @@
+// PKCS#1 and PKCS#8 format for RSA private key
+//
+// PKCS1, available in several versions as rfcs 2313 2437 3447 and 8017, is primarily about using the RSA algorithm for cryptography including encrypting decrypting signing and verifying. But since crypto is often used between systems or at least programs it is convenient to have a defined, interoperable format for keys, and PKCS1 defines fairly minimal formats for RSA public and private keys in appendix A.1. As Luke implied this uses ASN.1 conventionally encoded as DER, which is a standard for interoperably encoding data of almost any kind.
+//
+// PKCS8 available as rfc5208 on the other hand is a standard for handling private keys for all algorithms, not just RSA. It also uses ASN.1 DER, and starts by simply combining an AlgorithmIdentifier, an ASN.1 structure (first) defined by X.509 which not very surprisingly identifies an algorithm, with an OCTET STRING which contains a representation of the key in a fashion depending on the algorithm. For algorithm RSA, identified by an AlgorithmIdentifier containing an OID which means rsaEncryption, the OCTET STRING contains the PKCS1 private key encoding. PKCS8 also allows arbitrary 'attributes' to be added, but this is rarely used. (E.g. Unable to convert .jks to .pkcs12: excess private key)
+//
+// PKCS8 also provides an option to encrypt the private key, using password-based encryption (in practice though not explicitly required). This is common, especially when PKCS8 is used as the privatekey portion of PKCS12/PFX, though not universal.
+//
+// Since most systems today need to support multiple algorithms, and wish to be able to adapt to new algorithms as they are developed, PKCS8 is preferred for privatekeys, and a similar any-algorithm scheme defined by X.509 for publickeys. Although PKCS12/PFX is often preferred to both.
+//
+// Neither of these has anything to do with certificates or other PKI objects like CSRs, CRLs, OCSP, SCTs, etc. Those are defined by other standards, including some other members of the PKCS series -- although they may use the keys defined by these standards.
+//
+// PEM format as Luke said is a way of formatting, or (super)encoding, (almost any) binary/DER data in a way that is more convenient. It derives from a 1990s attempt at secure email named Privacy-Enhanced Mail hence PEM. In those days email systems often could transmit, or at least reliably transmit, only printable text with a limited character set, and often only limited line length, so PEM encoded binary data as base64 with line length 64. The PEM scheme itself was not very successful and has been superseded by others like PGP and S/MIME, but the format it defined is still used. Nowadays email systems often can transmit binary data, but as Luke said copy-and-paste often can only handle displayed characters so PEM is still useful, and in addition easier for humans to recognize.
+//
+// To be more exact, PEM encodes some data, such as but not limited to a PKCS1 or PKCS8 key or a certificate, CSR, etc, as:
+//
+// - a line consisting of 5 hyphens, the word BEGIN, one or a few (space-separated) words defining the type of data, and 5 hyphens
+// - an optional (and rare) rfc822-style header, terminated by an empty line
+// - base64 of the data, broken into lines of 64 characters (except the last); some programs instead use the (slightly newer) MIME limit of 76 characters
+// - a line like the BEGIN line but with END instead
+//
+// Some readers check/enforce the line length and END line and some don't, so if you get those wrong you may create files that sometimes work and sometimes don't, which is annoying to debug.
+//
 // Reference:
 // https://gist.github.com/miguelmota/3ea9286bd1d3c2a985b67cac4ba2130a
 // https://stackoverflow.com/questions/48958304/pkcs1-and-pkcs8-format-for-rsa-private-key
