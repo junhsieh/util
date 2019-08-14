@@ -26,6 +26,16 @@ func TestExecCommand(t *testing.T) {
 	fmt.Printf("Out (%d): %s\n", exitStatus, out)
 }
 
+func TestCloneIntSlice(t *testing.T) {
+	src := []int{1, 3, 5, 7}
+	dst, _ := util.CloneIntSlice(src)
+	src[0] = 11
+	dst[1] = 33
+
+	fmt.Printf("%p %#v\n", src, src)
+	fmt.Printf("%p %#v\n", dst, dst)
+}
+
 func TestNumOfDigits(t *testing.T) {
 	num := 0
 	numAdjusted := 0

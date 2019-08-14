@@ -1,3 +1,4 @@
+// Package util ...
 package util
 
 import (
@@ -107,18 +108,18 @@ func StrutToSliceOfFieldAddress(theStruct interface{}) []interface{} {
 	return fieldPtrArr
 }
 
-// Fill a slice with values.
+// SliceFill fills a slice with values.
 func SliceFill(num int, str string) []string {
 	slice := make([]string, num)
 
-	for k, _ := range slice {
+	for k := range slice {
 		slice[k] = str
 	}
 
 	return slice
 }
 
-// Generate the placeholders for SQL query.
+// Placeholder generates the placeholders for SQL query.
 func Placeholder(num int) string {
 	return strings.Join(SliceFill(num, "?"), ",")
 }
@@ -270,7 +271,7 @@ func InArrayV1(val interface{}, array interface{}) (exists bool, index int) {
 		s := reflect.ValueOf(array)
 
 		for i := 0; i < s.Len(); i++ {
-			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) {
 				index = i
 				exists = true
 				return
@@ -336,7 +337,7 @@ func EchoColor(msg string, color string) string {
 func Close(c io.Closer) {
 	// Note: do we need to add recover() here?
 	if err := c.Close(); err != nil {
-		log.Printf(err.Error())
+		log.Printf("%s", err.Error())
 	}
 }
 
@@ -544,7 +545,7 @@ func PowOfTenArr() []int {
 	}
 }
 
-// NumOfDigits (Divide and conquer approach) ...
+// NumOfDigitsDivideAndConquer (Divide and conquer approach) ...
 // Here are some ways of determining the number of digits in an integer:
 // - string method
 // - log10 method
@@ -728,10 +729,29 @@ func IntToDigitArr(num int) []int {
 
 // CopyIntSlice ...
 func CopyIntSlice(dst []int, src []int) int {
+	// Alternative one line solution
+	//dst = append(src[:0:0], src...)
+
+	//
 	if src == nil {
 		dst = nil
 		return 0
 	}
+
 	dst = make([]int, len(src))
 	return copy(dst, src)
+}
+
+// CloneIntSlice ...
+func CloneIntSlice(src []int) ([]int, int) {
+	// Alternative one line solution
+	//dst = append(src[:0:0], src...)
+
+	//
+	if src == nil {
+		return nil, 0
+	}
+
+	dst := make([]int, len(src))
+	return dst, copy(dst, src)
 }

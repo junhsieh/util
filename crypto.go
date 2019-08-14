@@ -1,3 +1,5 @@
+// Package util ...
+//
 // PKCS#1 and PKCS#8 format for RSA private key
 //
 // PKCS1, available in several versions as rfcs 2313 2437 3447 and 8017, is primarily about using the RSA algorithm for cryptography including encrypting decrypting signing and verifying. But since crypto is often used between systems or at least programs it is convenient to have a defined, interoperable format for keys, and PKCS1 defines fairly minimal formats for RSA public and private keys in appendix A.1. As Luke implied this uses ASN.1 conventionally encoded as DER, which is a standard for interoperably encoding data of almost any kind.
@@ -26,6 +28,7 @@
 // https://stackoverflow.com/questions/48958304/pkcs1-and-pkcs8-format-for-rsa-private-key
 // https://www.thepolyglotdeveloper.com/2018/02/encrypt-decrypt-data-golang-application-crypto-packages/
 // https://tutorialedge.net/golang/go-encrypt-decrypt-aes-tutorial/
+// https://github.com/gtank/cryptopasta
 package util
 
 import (
@@ -79,9 +82,7 @@ func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
 	}
 
 	//
-	var pubBytes []byte
-
-	pubBytes = pem.EncodeToMemory(&pem.Block{
+	pubBytes := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PUBLIC KEY",
 		Bytes: pubASN1,
 	})
@@ -95,7 +96,7 @@ func BytesToPrivateKey(data []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(data)
 	b := block.Bytes
 
-	if x509.IsEncryptedPEMBlock(block) == true {
+	if x509.IsEncryptedPEMBlock(block) {
 		if b, err = x509.DecryptPEMBlock(block, nil); err != nil {
 			return nil, err
 		}
@@ -120,7 +121,7 @@ func BytesToPrivateKey(data []byte) (*rsa.PrivateKey, error) {
 		}
 
 		if privKey, ok = ifc.(*rsa.PrivateKey); !ok {
-			return nil, fmt.Errorf("Failed to type assertion to *rsa.PrivateKey")
+			return nil, fmt.Errorf("failed to type assertion to *rsa.PrivateKey")
 		}
 	default:
 		return nil, fmt.Errorf("unsupported %s block.Type", block.Type)
@@ -153,7 +154,7 @@ func BytesToPublicKey(data []byte) (*rsa.PublicKey, error) {
 	var ok bool
 
 	if pubKey, ok = ifc.(*rsa.PublicKey); !ok {
-		return nil, fmt.Errorf("Failed to type assert to *rsa.PublicKey")
+		return nil, fmt.Errorf("failed to type assert to *rsa.PublicKey")
 	}
 
 	return pubKey, nil
