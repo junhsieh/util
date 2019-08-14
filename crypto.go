@@ -136,7 +136,7 @@ func BytesToPublicKey(data []byte) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode(data)
 	b := block.Bytes
 
-	if x509.IsEncryptedPEMBlock(block) == true {
+	if x509.IsEncryptedPEMBlock(block) {
 		if b, err = x509.DecryptPEMBlock(block, nil); err != nil {
 			return nil, err
 		}
