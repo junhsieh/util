@@ -387,7 +387,7 @@ func Uint32ToStr(num uint32) string {
 }
 
 // ExecCommand ...
-func ExecCommand(cmdArgs []string, timeout int) (string, error, int) {
+func ExecCommand(cmdArgs []string, timeout int) (string, int, error) {
 	var cmd *exec.Cmd
 	var bufOut bytes.Buffer
 	var bufErr bytes.Buffer
@@ -398,7 +398,7 @@ func ExecCommand(cmdArgs []string, timeout int) (string, error, int) {
 	cmd.Stderr = &bufErr
 
 	if err = cmd.Start(); err != nil {
-		return "", err, -1
+		return "", -1, err
 	}
 
 	// Use a channel to signal completion
@@ -418,14 +418,14 @@ func ExecCommand(cmdArgs []string, timeout int) (string, error, int) {
 		// https://stackoverflow.com/questions/18106749/golang-catch-signals
 		// https://gobyexample.com/signals
 		if err = cmd.Process.Signal(syscall.SIGTERM); err != nil {
-			return "", err, -1
+			return "", -1, err
 		}
 
 		// Kill the process forcefully.
 		select {
 		case <-time.After(3 * time.Second):
 			if err = cmd.Process.Kill(); err != nil {
-				return "", err, -1
+				return "", -1, err
 			}
 		case err = <-done:
 			return handleExecCommand(cmd, err)
@@ -434,10 +434,10 @@ func ExecCommand(cmdArgs []string, timeout int) (string, error, int) {
 		return handleExecCommand(cmd, err)
 	}
 
-	return "", errors.New("Unexpected (select did not handle return properly"), -1
+	return "", -1, errors.New("unexpected (select did not handle return properly")
 }
 
-func handleExecCommand(cmd *exec.Cmd, err error) (string, error, int) {
+func handleExecCommand(cmd *exec.Cmd, err error) (string, int, error) {
 	if err != nil {
 		var ok bool
 		var exitErr *exec.ExitError
@@ -445,17 +445,17 @@ func handleExecCommand(cmd *exec.Cmd, err error) (string, error, int) {
 
 		// Check to see if err is *exec.ExitError or something (most likely system generated error) else
 		if exitErr, ok = err.(*exec.ExitError); !ok {
-			return cmd.Stdout.(*bytes.Buffer).String(), err, -1
+			return cmd.Stdout.(*bytes.Buffer).String(), -1, err
 		}
 
 		if exitStatus, ok = exitErr.Sys().(syscall.WaitStatus); !ok {
-			return cmd.Stdout.(*bytes.Buffer).String(), errors.New("exitStatus could not be type assertion to syscall.WaitStatus"), -1
+			return cmd.Stdout.(*bytes.Buffer).String(), -1, errors.New("exitStatus could not be type assertion to syscall.WaitStatus")
 		}
 
-		return cmd.Stdout.(*bytes.Buffer).String(), errors.New(cmd.Stderr.(*bytes.Buffer).String()), exitStatus.ExitStatus()
+		return cmd.Stdout.(*bytes.Buffer).String(), exitStatus.ExitStatus(), errors.New(cmd.Stderr.(*bytes.Buffer).String())
 	}
 
-	return cmd.Stdout.(*bytes.Buffer).String(), nil, 0
+	return cmd.Stdout.(*bytes.Buffer).String(), 0, nil
 }
 
 // IntSliceEqual tells whether a and b contain the same elements.

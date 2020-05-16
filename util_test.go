@@ -18,7 +18,7 @@ func TestExecCommand(t *testing.T) {
 	var exitStatus int
 	cmdArgs := []string{"sh", "-c", `ls /bin/bash`}
 
-	if out, err, exitStatus = util.ExecCommand(cmdArgs, 3); err != nil {
+	if out, exitStatus, err = util.ExecCommand(cmdArgs, 3); err != nil {
 		fmt.Printf("Error (%d): %s\n", exitStatus, err.Error())
 		return
 	}
