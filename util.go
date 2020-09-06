@@ -756,6 +756,14 @@ func CloneIntSlice(src []int) ([]int, int) {
 	return dst, copy(dst, src)
 }
 
+// CloneByteSlice ...
+// (Note: The way introduced in this article is not the best solution universally. For some scenarios, the target slice is expected to be nil even if the source slice is a non-nil blank one, to avoid sharing underlying elements.)
+// (Note 2: There is an imperfection in the perfect clone implementation: the final capacity might be not the same as the original one.)
+// https://github.com/go101/go101/wiki/How-to-perfectly-clone-a-slice%3F
+func CloneByteSlice(a []int, low int, high int) []int {
+	return append(a[0:0:0], a[low:high]...)
+}
+
 // GetEnv ...
 func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
