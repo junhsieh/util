@@ -19,6 +19,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"unsafe"
 )
 
 func ReadInput() (string, error) {
@@ -770,4 +771,9 @@ func GetEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+// GetSliceHeader ...
+func GetSliceHeader(buf []string) *reflect.SliceHeader {
+	return (*reflect.SliceHeader)(unsafe.Pointer(&buf))
 }
